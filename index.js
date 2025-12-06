@@ -18,13 +18,13 @@ function generateRandomId(){
 
 function verifyToken(header){
     console.log({header})
-const authorizationHeader = header["authorization"]
+    const authorizationHeader = header["authorization"]
 
-const token = authorizationHeader.split(" ")[1]
-const payload = jwt.verify(token,JWT_SECRET_KEY)
-console.log({users,payload})
-const foundUser = users.find((user)=>{return user.id === payload.userId})
-return foundUser
+    const token = authorizationHeader.split(" ")[1]
+    const payload = jwt.verify(token,JWT_SECRET_KEY)
+    console.log({users,payload})
+    const foundUser = users.find((user)=>{return user.id === payload.userId})
+    return foundUser
 }
 
 app.post("/signup", (req, res) => {
@@ -58,15 +58,29 @@ app.post("/signin", (req, res) => {
 })
 
 app.get("/blogs", (req, res) => {
+    if (!verifyToken(req.headers)){
+        res.status(413).json({
+            'msg': 'User is not authenticated!'
+        })
+    }
+    else{
+        const allBlogs = blogs.map((eachBlog) => {
+            return{
+                userId: eachBlog.userId,
+                title: eachBlog.title,
+                content: eachBlog.content
+            }
+        })
+        res.status(200).json({
+            'blogsData': allBlogs
+        })
+    }
     
-console.log(verifyToken(req.headers))
 })
 
 app.post("/create-blogs", (req, res) => {
 
 })
-
-
 
 app.get("/blogs/:id", (req, res) => {
 
