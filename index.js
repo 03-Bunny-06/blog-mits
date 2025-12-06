@@ -59,8 +59,8 @@ app.post("/signin", (req, res) => {
 
 app.get("/blogs", (req, res) => {
     if (!verifyToken(req.headers)){
-        res.status(413).json({
-            'msg': 'User is not authenticated!'
+        res.status(401).json({
+            'msg': 'User is not authorized!'
         })
     }
     else{
@@ -79,14 +79,53 @@ app.get("/blogs", (req, res) => {
 })
 
 app.post("/create-blogs", (req, res) => {
-
+    if(!verifyToken(req.headers)){
+        res.status(401).json({
+            'msg': 'User is not authorized!'
+        })
+    }
+    else{
+        const {userId, title, content} = req.body;
+        const newBlog = {
+            id: generateRandomId(),
+            userId,
+            title,
+            content
+        }
+        blogs.push(newBlog)
+        res.status(200).json({
+            'updatedBlog': newBlog,
+            'msg': 'New Blog added successfully!!'
+        })
+    }
 })
 
 app.get("/blogs/:id", (req, res) => {
+    if(!verifyToken(req.headers)){
+        res.status(401).json({
+            'msg': 'User is not authorized!'
+        })
+    }
+    else{
+        const blogId = req.params.id;
+        const blogExists = blogs.find((eachBlog) => eachBlog.id === blogId);
+        if (blogExists){
+                res.status(200).json({
+                    'msg': 'Blog found!',
+                    'blogData': blogExists
+                })
+            }
+            else{
+                res.status(401).json({
+                    'msg': 'Blog not found!'
+                })
+            }
+        }
+    }
+)
 
+const port = 3000;
+
+app.listen(port, () => {
+    console.log(`Server started at port: ${port}`);
 })
-
-
-
-
-app.listen(3000)
